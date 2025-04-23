@@ -19,8 +19,11 @@ if not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
     os.environ["HUGGINGFACEHUB_API_TOKEN"] = hugging_face_api
 if not os.getenv("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = tavily_api
+os.environ["LANGCHAIN_API_KEY"] = ...
+os.environ["TOGETHER_API_KEY"] = ...
 os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["OPENAI_API_KEY"] = openai_api
+
 
 class Agent:
     # I might want to put these arguments in a config later instead
