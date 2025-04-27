@@ -1,13 +1,7 @@
-import getpass
-import os
 import re
+from utils import load_credentials
 
-if not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
-    os.environ["HUGGINGFACEHUB_API_TOKEN"] = hugging_face_api
-if not os.getenv("TAVILY_API_KEY"):
-    os.environ["TAVILY_API_KEY"] = tavily_api
-os.environ["LANGSMITH_TRACING"] = "true"
-os.environ["OPENAI_API_KEY"] = openai_api
+load_credentials()
 
 # Import relevant functionality
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
@@ -71,7 +65,7 @@ model_with_tools = model.bind_tools(tools)
 # advanced agent executor
 def tool_decider(prompt):
     decision = model.invoke(
-        [SystemMessage(content="Are you able to answer this question without google? Please return yes or no."),
+        [SystemMessage(content="Are you able to answer this question without a web search? Please return yes or no. You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure."),
          HumanMessage(content=prompt)])
 
     # if "no" then True, we have to use a tool
@@ -80,22 +74,34 @@ def tool_decider(prompt):
 
 # Use the agent
 config = {"configurable": {"thread_id": "abc123"}}
-prompt1 = "hi im bob! and i live in sf"
-if tool_decider(prompt1):
+messages = [SystemMessage(content="You are a helpful assistant. Before responding to, you must determine if you are able to answer this question without a web search? You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure.")]
+user_input = ""
+while user_input != "exit":
     for step in agent_executor.stream(
-        {"messages": [HumanMessage(content="hi im bob! and i live in sf")]},
-        config,
-        stream_mode="values",
-    ):
+            {"messages": messages},
+            config,
+            stream_mode="values",
+        ):
         step["messages"][-1].pretty_print()
+    user_input = input("Enter:  ")
+    messages.append(HumanMessage(content=user_input))
 
-prompt2 = "whats the weather where I live?"  # note that memory failed, it didn't know I lived in sf.
-if tool_decider(prompt2):
-    for step in agent_executor.stream(
-        {"messages": [HumanMessage(content=prompt2)]},
-        config,
-        stream_mode="values",
-    ):
-        step["messages"][-1].pretty_print()
+# prompt1 = "hi im bob! and i live in sf"
+# if tool_decider(prompt1):
+#     for step in agent_executor.stream(
+#         {"messages": [HumanMessage(content="hi im bob! and i live in sf")]},
+#         config,
+#         stream_mode="values",
+#     ):
+#         step["messages"][-1].pretty_print()
+
+# prompt2 = "whats the weather where I live?"  # note that memory failed, it didn't know I lived in sf.
+# if tool_decider(prompt2):
+#     for step in agent_executor.stream(
+#         {"messages": [HumanMessage(content=prompt2)]},
+#         config,
+#         stream_mode="values",
+#     ):
+#         step["messages"][-1].pretty_print()
 
 
