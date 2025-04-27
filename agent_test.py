@@ -9,6 +9,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
+from tools import generate_equation, format_equation, format_plot
 
 # Create the agent
 memory = MemorySaver()
@@ -33,8 +34,10 @@ model = ChatTogether(
 # model = ChatHuggingFace(llm=llm)
 
 # model = ChatHuggingFace(llm=llm)
-search = TavilySearchResults(max_results=2, description="Use this tool to look up real-time facts like weather, news, or recent events.")
-tools = [search]
+# search = TavilySearchResults(max_results=2, description="Use this tool to look up real-time facts like weather, news, or recent events.")
+# tools = [search]
+tools = [generate_equation, format_equation, format_plot]
+
 agent_executor = create_react_agent(model, tools, checkpointer=memory)
 
 # other setup we might be missing
@@ -64,7 +67,7 @@ model_with_tools = model.bind_tools(tools)
 
 # advanced agent executor
 def tool_decider(prompt):
-    decision = model.invoke(
+    decision = model_with_tools.invoke(
         [SystemMessage(content="Are you able to answer this question without a web search? Please return yes or no. You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure."),
          HumanMessage(content=prompt)])
 
@@ -74,7 +77,7 @@ def tool_decider(prompt):
 
 # Use the agent
 config = {"configurable": {"thread_id": "abc123"}}
-messages = [SystemMessage(content="You are a helpful assistant. Before responding to, you must determine if you are able to answer this question without a web search? You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure.")]
+messages = [SystemMessage(content="You are a helpful assistant. Before responding to, you must determine if you are able to answer this question without a web search? You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure."), HumanMessage(content="hi! I need math help") ]
 user_input = ""
 while user_input != "exit":
     for step in agent_executor.stream(
