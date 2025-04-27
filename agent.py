@@ -11,19 +11,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
+from utils import load_credentials
 
 from tools import multiply
 
-# environment setups with APIs
-if not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
-    os.environ["HUGGINGFACEHUB_API_TOKEN"] = hugging_face_api
-if not os.getenv("TAVILY_API_KEY"):
-    os.environ["TAVILY_API_KEY"] = tavily_api
-os.environ["LANGCHAIN_API_KEY"] = ...
-os.environ["TOGETHER_API_KEY"] = ...
-os.environ["LANGSMITH_TRACING"] = "true"
-os.environ["OPENAI_API_KEY"] = openai_api
-
+load_credentials()
 
 class Agent:
     # I might want to put these arguments in a config later instead
