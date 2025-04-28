@@ -32,8 +32,7 @@ class Agent():
         # the following are for deciding which tools we should use
         self.system_prompts = {
             "default": "You are a helpful math assistant. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without LaTeX. If so, do not use the tools. You must only use tools when the model has enough context to answer the question. If you are unsure how to answer the question, say you are unsure.",
-            "tavily": "Are you able to answer this question without google? Please return yes or no.",
-            "multiply": "Are you able to answer this question without calculator? Please return yes or no."
+            "tavily": "Are you able to answer this question without google? Please return yes or no."
         }
         self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
         tool_agent = self.build_tool_agent()
@@ -51,7 +50,7 @@ class Agent():
         """Decides if we should use the tool by having the model reason whether it should use its tools while it doesn't have it's agent and memory attached"""
         decision = self.model.invoke(
             [SystemMessage(content=system_prompt),
-             HumanMessage(content=prompt)])
+            HumanMessage(content=prompt)])
 
         # if "no" then True, we have to use a tool
         # response = step["messages"][-1]
@@ -83,11 +82,16 @@ class Agent():
         agent_executor = self.build_tool_agent()
         user_input = ""
         while user_input != "exit":
-            for step in agent_executor.stream(
-                    {"messages": messages},
-                    config,
-                    stream_mode="values",
-                ):
-                step["messages"][-1].pretty_print()
+            steps = [step["messages"][-1] for step in agent_executor.stream(
+                {"messages": messages},
+                config,
+                stream_mode="values")]
+            steps[-1].pretty_print()
+            # for step in agent_executor.stream(
+            #         {"messages": messages},
+            #         config,
+            #         stream_mode="values",
+            #     ):
+                # step["messages"][-1].pretty_print()
             user_input = input("Enter:  ")
             messages.append(HumanMessage(content=user_input))
