@@ -36,7 +36,7 @@ class Agent():
             "multiply": "Are you able to answer this question without calculator? Please return yes or no."
         }
         self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
-        tool_agent = self.build_tool_agent()
+        self.tool_agent = self.build_tool_agent()
 
     def build_tool_agent(self, *tools):
         # Create the agent
@@ -80,10 +80,9 @@ class Agent():
         messages = [
             SystemMessage(content=self.system_prompts["default"])
         ]
-        agent_executor = self.build_tool_agent()
         user_input = ""
         while user_input != "exit":
-            for step in agent_executor.stream(
+            for step in self.tool_agent.stream(
                     {"messages": messages},
                     config,
                     stream_mode="values",
