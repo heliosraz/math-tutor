@@ -12,12 +12,11 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
 from utils import load_credentials
-
-from tools import multiply
+from tools import MathToolkit
 
 load_credentials()
 
-class Agent:
+class Agent():
     # I might want to put these arguments in a config later instead
     # RECOMMENDED MODEL: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
     def __init__(self, model_name, chat_model=ChatTogether, max_tokens=512, temperature=0.0, verbose=True):
@@ -32,19 +31,18 @@ class Agent:
         self.memory = MemorySaver()
         # the following are for deciding which tools we should use
         self.system_prompts = {
+            "default": "You are a helpful math assistant. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without LaTeX. You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure.",
             "tavily": "Are you able to answer this question without google? Please return yes or no.",
-            "multiply": "Are you able to answer this question without calculator? Please return yes or no.",
+            "multiply": "Are you able to answer this question without calculator? Please return yes or no."
         }
-
-    # todo: consider moving this to tools.py somehow
-    def tavily_tool(self):
-        """Creating the tavily tool"""
-        search = TavilySearchResults(max_results=2, description="Use this tool to look up real-time facts like weather, news, or recent events.")
-        return search
+        self.toolkits = [MathToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
+        tool_agent = self.build_tool_agent()
 
     def build_tool_agent(self, *tools):
         # Create the agent
-        tools = list(tools)
+        tools = []
+        for toolkit in self.toolkits:
+            tools += toolkit.get_tools()
         tool_agent_executor = create_react_agent(self.model, tools, checkpointer=self.memory)
 
         return tool_agent_executor
@@ -62,14 +60,17 @@ class Agent:
     def stream(self, prompt, **stream_kwargs):
         """Normal stream but reasons which tools it should use first"""
 
-        # decide which tools to use
-        if self._tool_decider(prompt, self.system_prompts["tavily"]):
-            executor = self.build_tool_agent(self.tavily_tool())
-        elif self._tool_decider(prompt, self.system_prompts["multiply"]):
-            executor = self.build_tool_agent(multiply)
-        else:
-            executor = self.build_tool_agent()
+        # # decide which tools to use
+        # if self._tool_decider(prompt, self.system_prompts["tavily"]):
+        #     executor = self.build_tool_agent(self.tavily_tool())
+        # elif self._tool_decider(prompt, self.system_prompts["multiply"]):
+        #     executor = self.build_tool_agent(multiply)
+        # else:
+        #     executor = self.build_tool_agent()
+        system_prompt = SystemMessage(content=self.system_prompts["default"])
+        prompt = HumanMessage(content=self.system_prompts["default"])
+        executor = self.build_tool_agent()
 
         # generate the stream
-        for step in executor.stream({"messages":[prompt]}, **stream_kwargs):
+        for step in executor.stream({"messages":[system_prompt, prompt]}, **stream_kwargs):
             yield step
