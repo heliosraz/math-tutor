@@ -76,4 +76,17 @@ class Agent():
             yield step
     
     def run(self):
-        pass
+        config = {}
+        messages = [
+            SystemMessage(content=self.system_prompts["default"])
+        ]
+        user_input = ""
+        while user_input != "exit":
+            for step in self.agent_executor.stream(
+                    {"messages": messages},
+                    config,
+                    stream_mode="values",
+                ):
+                step["messages"][-1].pretty_print()
+            user_input = input("Enter:  ")
+            messages.append(HumanMessage(content=user_input))
