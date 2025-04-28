@@ -116,6 +116,11 @@ class LaTeXToolkit(BaseToolkit):
                 name="format_plot",
                 func=lambda equation: self._invoke_model(f"Plot this equation: {equation}"),
                 description="Plot the given equation in a LaTeX format."
+            ),
+            Tool(
+                name="explain_further",
+                func= lambda step: self._invoke_model(f"There is confusion about this step: {step}. Please explain further."),
+                description="Further explain the given step due to the user's confusion."
             )
         ]
 
