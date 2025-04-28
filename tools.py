@@ -81,26 +81,43 @@ class MathToolkit(BaseToolkit):
 # pgfplots
 # '''
 
-# from langchain_core.tools import tool
-# from langchain_together.chat_models import ChatTogether
-# from langchain_core.messages import SystemMessage, HumanMessage
+class LaTeXToolkit(BaseToolkit):
+    _model: str 
+    _system_prompt: str 
+    def __init__(self, model_name: str, **kwargs):
+        super().__init__(**kwargs)
+        self._model = ChatTogether(
+            model=model_name,
+            max_tokens=512,
+            temperature=0.0,
+            verbose=True,
+        )
+        self._system_prompt = SYSTEM_PROMPT
 
-# model = ChatTogether(
-#     model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",  # or whichever chat model you prefer
-#     max_tokens=512,                   # required by the completions API :contentReference[oaicite:0]{index=0}
-#     temperature=0.0,
-#     verbose=True,
-# )
-# SYSTEM_PROMPT = '''
-# You are an LaTeX expert. You must only ansgwer the instructions with LaTeX formatted responses. Please respond to the user's queries in a clear and concise manner and never provide any justification. If you are unable to answer the question, please respond with 'I don't know'. You must make sure that your response is able to compile using MathJax
+    def _invoke_model(self, prompt: str) -> str:
+        return self.model.invoke([
+            SystemMessage(content=self.system_prompt),
+            HumanMessage(content=prompt)
+        ])
 
-# ###LaTeX Libraries
-# You may use the following LaTeX libraries in your response:
-# amsmath
-# amssymb
-# tikz
-# pgfplots
-# '''
+    def get_tools(self) -> List[Tool]:
+        return [
+            Tool(
+                name="generate_equation",
+                func=lambda problem_reasoning: self._invoke_model(f"Generate the equation for this following description: {problem_reasoning}"),
+                description="Generates an equation for a given description."
+            ),
+            Tool(
+                name="format_equation",
+                func=lambda equation: self._invoke_model(f"Format the equation: {equation}"),
+                description="Format the given equation into LaTeX format."
+            ),
+            Tool(
+                name="format_plot",
+                func=lambda equation: self._invoke_model(f"Plot this equation: {equation}"),
+                description="Plot the given equation in a LaTeX format."
+            )
+        ]
 
 # @tool
 # def generate_equation(problem_reasoning:str):

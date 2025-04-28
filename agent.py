@@ -74,3 +74,6 @@ class Agent():
         # generate the stream
         for step in executor.stream({"messages":[system_prompt, prompt]}, **stream_kwargs):
             yield step
+    
+    def run(self):
+        pass
