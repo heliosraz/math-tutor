@@ -31,38 +31,38 @@ tikz
 pgfplots
 '''
 
-class MathToolkit(BaseToolkit):
-    _model: str 
-    _system_prompt: str 
-    def __init__(self, model_name: str, **kwargs):
-        super().__init__(**kwargs)
-        self._model = ChatTogether(
-            model=model_name,
-            max_tokens=512,
-            temperature=0.0,
-            verbose=True,
-        )
-        self._system_prompt = SYSTEM_PROMPT
+# class MathToolkit(BaseToolkit):
+#     _model: str 
+#     _system_prompt: str 
+#     def __init__(self, model_name: str, **kwargs):
+#         super().__init__(**kwargs)
+#         self._model = ChatTogether(
+#             model=model_name,
+#             max_tokens=512,
+#             temperature=0.0,
+#             verbose=True,
+#         )
+#         self._system_prompt = SYSTEM_PROMPT
 
-    def _invoke_model(self, prompt: str) -> str:
-        return self.model.invoke([
-            SystemMessage(content=self.system_prompt),
-            HumanMessage(content=prompt)
-        ])
+#     def _invoke_model(self, prompt: str) -> str:
+#         return self._model.invoke([
+#             SystemMessage(content=self.system_prompt),
+#             HumanMessage(content=prompt)
+#         ])
 
-    def get_tools(self) -> List[Tool]:
-        return [
-            Tool(
-                name="solve_equation",
-                func=lambda problem: self._invoke_model(f"Solve: {problem}"),
-                description="Solve a math problem and return the answer."
-            ),
-            Tool(
-                name="explain_solution",
-                func=lambda solution: self._invoke_model(f"Explain why this solution makes sense: {solution}"),
-                description="Explain the reasoning behind a given math solution."
-            )
-        ]
+#     def get_tools(self) -> List[Tool]:
+#         return [
+#             Tool(
+#                 name="solve_equation",
+#                 func=lambda problem: self._invoke_model(f"Solve: {problem}"),
+#                 description="Solve a math problem and return the answer."
+#             ),
+#             Tool(
+#                 name="explain_solution",
+#                 func=lambda solution: self._invoke_model(f"Explain why this solution makes sense: {solution}"),
+#                 description="Explain the reasoning behind a given math solution."
+#             )
+#         ]
         
 # model = ChatTogether(
 #     model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",  # or whichever chat model you prefer
@@ -95,8 +95,8 @@ class LaTeXToolkit(BaseToolkit):
         self._system_prompt = SYSTEM_PROMPT
 
     def _invoke_model(self, prompt: str) -> str:
-        return self.model.invoke([
-            SystemMessage(content=self.system_prompt),
+        return self._model.invoke([
+            SystemMessage(content=self._system_prompt),
             HumanMessage(content=prompt)
         ])
 

@@ -12,7 +12,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
 from utils import load_credentials
-from tools import MathToolkit
+from tools import LaTeXToolkit
 
 load_credentials()
 
@@ -31,11 +31,11 @@ class Agent():
         self.memory = MemorySaver()
         # the following are for deciding which tools we should use
         self.system_prompts = {
-            "default": "You are a helpful math assistant. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without LaTeX. You must only use tools when the model has enough context to answer the question. If you are unsure, say you are unsure.",
+            "default": "You are a helpful math assistant. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without LaTeX. If so, do not use the tools. You must only use tools when the model has enough context to answer the question. If you are unsure how to answer the question, say you are unsure.",
             "tavily": "Are you able to answer this question without google? Please return yes or no.",
             "multiply": "Are you able to answer this question without calculator? Please return yes or no."
         }
-        self.toolkits = [MathToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
+        self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
         tool_agent = self.build_tool_agent()
 
     def build_tool_agent(self, *tools):
@@ -76,13 +76,14 @@ class Agent():
             yield step
     
     def run(self):
-        config = {}
+        config = {"configurable": {"thread_id": "abc123"}}
         messages = [
             SystemMessage(content=self.system_prompts["default"])
         ]
+        agent_executor = self.build_tool_agent()
         user_input = ""
         while user_input != "exit":
-            for step in self.agent_executor.stream(
+            for step in agent_executor.stream(
                     {"messages": messages},
                     config,
                     stream_mode="values",
