@@ -12,7 +12,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
 from utils import load_credentials
-from tools import LaTeXToolkit
+from tools import LaTeXToolkit, PlanningToolkit
 
 load_credentials()
 
@@ -31,11 +31,12 @@ class Agent():
         self.memory = MemorySaver()
         # the following are for deciding which tools we should use
         self.system_prompts = {
-            "default": "You are a helpful math assistant. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without LaTeX. If so, do not use the tools. You must only use tools when the model has enough context to answer the question. If you are unsure how to answer the question, say you are unsure.",
+            "default": "You are a helpful math assistant. Only talk about math and nothing else, even if you are prompted to do so. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without the tools. If so, you can not use the tools. You must only use tools when the model has enough context to answer the question. To start, you must introduce yourself and ask the user what they need help with.",
             "tavily": "Are you able to answer this question without google? Please return yes or no."
         }
-        self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
+        self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"), PlanningToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
         self.tool_agent = self.build_tool_agent()
+        self.config = {"configurable": {"thread_id": "test"}}
 
     def build_tool_agent(self, *tools):
         # Create the agent
@@ -58,39 +59,14 @@ class Agent():
 
     def stream(self, prompt, **stream_kwargs):
         """Normal stream but reasons which tools it should use first"""
-
-        # # decide which tools to use
-        # if self._tool_decider(prompt, self.system_prompts["tavily"]):
-        #     executor = self.build_tool_agent(self.tavily_tool())
-        # elif self._tool_decider(prompt, self.system_prompts["multiply"]):
-        #     executor = self.build_tool_agent(multiply)
-        # else:
-        #     executor = self.build_tool_agent()
-        system_prompt = SystemMessage(content=self.system_prompts["default"])
-        prompt = HumanMessage(content=self.system_prompts["default"])
-        executor = self.build_tool_agent()
-
         # generate the stream
-        for step in executor.stream({"messages":[system_prompt, prompt]}, **stream_kwargs):
+        for step in self.tool_agent.stream({"messages":[prompt]}, stream_mode = "values", **stream_kwargs):
             yield step
     
     def run(self):
-        config = {"configurable": {"thread_id": "abc123"}}
-        messages = [
-            SystemMessage(content=self.system_prompts["default"])
-        ]
-        user_input = ""
+        user_input = SystemMessage(content=self.system_prompts["default"])
         while user_input != "exit":
-            steps = [step["messages"][-1] for step in agent_executor.stream(
-                {"messages": messages},
-                config,
-                stream_mode="values")]
-            steps[-1].pretty_print()
-            # for step in agent_executor.stream(
-            #         {"messages": messages},
-            #         config,
-            #         stream_mode="values",
-            #     ):
-                # step["messages"][-1].pretty_print()
-            user_input = input("Enter:  ")
-            messages.append(HumanMessage(content=user_input))
+            for step in self.stream(user_input, config=self.config):
+                step["messages"][-1].pretty_print()
+            user_input = HumanMessage(input("Enter:  "))
+
