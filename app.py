@@ -40,7 +40,7 @@ def get_tutor_response():
             {"messages": messages},
             config,
             stream_mode="values"))
-    response = steps[-1]["messages"][-1]
+    response = steps[-1]["messages"][-1].pretty_repr()
     return jsonify({'response':response})
 
 
