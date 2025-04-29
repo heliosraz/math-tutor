@@ -110,11 +110,6 @@ pgfplots
                 name="format_plot",
                 func=lambda equation: self._invoke_model(f"Plot this equation: {equation}"),
                 description="Plot the given equation in a LaTeX format."
-            ),
-            Tool(
-                name="explain_further",
-                func= lambda step: self._invoke_model(f"There is confusion about this step: {step}. Please explain further."),
-                description="Further explain the given step due to the user's confusion."
             )
         ]
 
@@ -167,7 +162,17 @@ These are the following topics students may ask about and are expected to know:
                 name="elaborate",
                 func=lambda confusion, problem: self._invoke_model(f"Generate a plan to address the student's confusion for the problem.\n Confusion: {confusion}\n Problem: {problem}"),
                 description="Generates a plan to address the student's confusion for the problem."
-            )
+            ),
+            Tool(
+                name="step",
+                func=lambda answer: self._invoke_model(f"What step is the student on in the following: {answer}"),
+                description="identifies what step the user is on in the problem solving process."
+            ),
+            # Tool(
+            #     name="explain_further",
+            #     func= lambda step: self._invoke_model(f"There is confusion about this step: {step}. Please explain further."),
+            #     description="Further explain the given step due to the user's confusion."
+            # )
         ]
 #     @tool
 #     def tavily_tool(self):

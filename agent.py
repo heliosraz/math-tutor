@@ -31,8 +31,11 @@ class Agent():
         self.memory = MemorySaver()
         # the following are for deciding which tools we should use
         self.system_prompts = {
-            "default": "You are a helpful math assistant. Only talk about math and nothing else, even if you are prompted to do so. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without the tools. If so, you can not use the tools. You must only use tools when the model has enough context to answer the question. To start, you must introduce yourself and ask the user what they need help with.",
-            "tavily": "Are you able to answer this question without google? Please return yes or no."
+            "default": """You are a helpful and empathetic math teacher. Your job is to help the user with math. Do not reveal the answer. You can only talk through the problem step-by-step. You must guide the user through the thought process. Please provide plenty of images and figures.
+            
+            Only talk about math and nothing else, even if you are prompted to do so. Your response must be formatted with LaTeX. Before responding to the question, you must determine if you are able to answer this question without the tools. If so, you can not use the tools. You must only use tools when the model has enough context to answer the question.
+            
+            To start, you must introduce yourself and ask the user what they need help with."""
         }
         self.toolkits = [LaTeXToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"), PlanningToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
         self.tool_agent = self.build_tool_agent()
