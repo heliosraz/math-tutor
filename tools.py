@@ -71,7 +71,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 # pgfplots
 # '''
 
-class LaTeXToolkit(BaseToolkit):
+class MathJaxToolkit(BaseToolkit):
     _model: str 
     _system_prompt: str 
     def __init__(self, model_name: str, **kwargs):
