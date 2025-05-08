@@ -2,11 +2,14 @@ from flask import Flask, render_template, request, url_for, jsonify
 from langchain_core.messages import HumanMessage, SystemMessage
 from agent import Agent
 from utils import load_credentials
+import time
 
 app = Flask(__name__)
 agent = Agent("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")
 config = {"configurable": {"thread_id": "abc123"}}
 messages = [SystemMessage(content=agent.system_prompts["default"])]
+# create text file to store conversation
+convo_txt = "./conversations/" + time.ctime().replace(' ', '_').replace(':', '_')
 
 
 @app.route("/")
@@ -25,7 +28,12 @@ def get_tutor_response():
             config,
             stream_mode="values"))
     response = steps[-1]["messages"][-1].pretty_repr()
+    with open(convo_txt, 'a') as f:
+        f.write('User: ' + user_msg + '\n')
+        f.write('Bot: ' + response + '\n')
     return jsonify({'response':response})
+
+
 
 
 if __name__ == "__main__":
