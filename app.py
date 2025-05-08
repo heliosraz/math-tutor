@@ -7,6 +7,7 @@ from langgraph.prebuilt import create_react_agent
 from utils import load_credentials
 from langchain_together.chat_models import ChatTogether
 import time
+import os
 
 
 # toolkit = [generate_equation, format_equation, format_plot, explain_further]
@@ -25,6 +26,7 @@ agent = Agent("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")
 config = {"configurable": {"thread_id": "abc123"}}
 messages = [SystemMessage(content=agent.system_prompts["default"])]
 # create text file to store conversation
+os.makedirs("./conversations/", exist_ok = True)
 convo_txt = "./conversations/" + time.ctime().replace(' ', '_').replace(':', '_')
 
 
@@ -43,7 +45,7 @@ def get_tutor_response():
             {"messages": messages},
             config,
             stream_mode="values"))
-    response = steps[-1]["messages"][-1].pretty_repr()
+    response = steps[-1]["messages"][-1].pretty_repr(html=True)
     with open(convo_txt, 'a') as f:
         f.write('User: ' + user_msg + '\n')
         f.write('Bot: ' + response + '\n')
