@@ -6,6 +6,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from utils import load_credentials
 from langchain_together.chat_models import ChatTogether
+import time
 
 
 # toolkit = [generate_equation, format_equation, format_plot, explain_further]
@@ -23,6 +24,8 @@ app = Flask(__name__)
 agent = Agent("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")
 config = {"configurable": {"thread_id": "abc123"}}
 messages = [SystemMessage(content=agent.system_prompts["default"])]
+# create text file to store conversation
+convo_txt = "./conversations/" + time.ctime().replace(' ', '_').replace(':', '_')
 
 
 @app.route("/")
@@ -41,7 +44,12 @@ def get_tutor_response():
             config,
             stream_mode="values"))
     response = steps[-1]["messages"][-1].pretty_repr()
+    with open(convo_txt, 'a') as f:
+        f.write('User: ' + user_msg + '\n')
+        f.write('Bot: ' + response + '\n')
     return jsonify({'response':response})
+
+
 
 
 if __name__ == "__main__":

@@ -40,7 +40,6 @@
   <input type="text" id="user-input" placeholder="Type a message..." style="width: 80%;">
   <button onclick="sendMessage()">Send</button>
 </div>
-
 <script>
   async function sendMessage() {
     const inputField = document.getElementById('user-input');
@@ -48,6 +47,7 @@
     if (!message.trim()) return;
 
     addMessage('user', message);
+    inputField.value = '';
 
     const response = await fetch('/chat', {
       method: 'POST',
@@ -61,7 +61,6 @@
     // After adding bot response, trigger MathJax typesetting
     MathJax.typeset();
 
-    inputField.value = '';
   }
 
   function addMessage(sender, text) {
@@ -72,6 +71,16 @@
     chatbox.appendChild(messageElem);
     chatbox.scrollTop = chatbox.scrollHeight;
   }
+
+  window.onload = function() {
+  addMessage('bot', 'Hello! I am an agentic LLM math tutor. Would you like me to explain a problem to you?');
+};
+  document.getElementById('user-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+
 </script>
 
 </body>
