@@ -11,6 +11,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
 from utils import load_credentials
 from tools import MathJaxToolkit, PlanningToolkit
+import os
 
 load_credentials()
 
@@ -22,6 +23,7 @@ class Agent():
         self.model = chat_model(
             model_name=model_name,
             max_tokens=max_tokens, # required by the completions API :contentReference[oaicite:0]{index=0}
+            together_api_key = os.environ['TOGETHER_API_KEY'],
             temperature=temperature,
             verbose=verbose
         )
