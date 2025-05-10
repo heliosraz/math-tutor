@@ -35,6 +35,7 @@ math-tutor/
 
 ## Use 
 Clone the repo, and cd to the directory. Once you are cd'ed into the directory, you can run the following commands.
+
 Build the docker app
 ```shell
 # Build the image
