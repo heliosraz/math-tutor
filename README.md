@@ -34,6 +34,11 @@ math-tutor/
 
 
 ## Use 
+Obtain all of the API keys necessary, as shown in `secrets.txt`. You will need to go to each of those websites and make an account to get those keys. When adding them to the .txt file, put a space between the name of the API and the API key. The following is an example for within secrets.txt.
+```text
+API_KEY key_image_code
+```
+
 Clone the repo, and cd to the directory. Once you are cd'ed into the directory, you can run the following commands.
 
 Build the docker app
