@@ -34,10 +34,11 @@ math-tutor/
 
 
 ## Use 
+Clone the repo, and cd to the directory. Once you are cd'ed into the directory, you can run the following commands.
 Build the docker app
 ```shell
 # Build the image
-docker build -t math_tutor [REPO DIR]
+docker build -t math_tutor .
 ```
 Once you have run the Docker app, make sure to run the image as so, in order for you to be able to access the port:
 ```shell
