@@ -42,6 +42,6 @@ docker build -t math_tutor [REPO DIR]
 Once you have run the Docker app, make sure to run the image as so, in order for you to be able to access the port:
 ```shell
 # Run the image
-docker run -p [PORT]:5000 [IMAGE_NAME]
+docker run -p [PORT]:5000 math_tutor
 ```
 Finally, you should be able to access the website on the following page: `localhost:[PORT]`
