@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, url_for, jsonify
 from langchain_core.messages import HumanMessage, SystemMessage
 from agent import Agent
-from utils import load_credentials
 import time
 import os
 

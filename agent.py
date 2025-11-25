@@ -7,11 +7,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from langchain_together.chat_models import ChatTogether
 from langchain_openai import ChatOpenAI
-from utils import load_credentials
 from tools import MathJaxToolkit, PlanningToolkit
-import os
-
-load_credentials()
 
 class Agent():
     # I might want to put these arguments in a config later instead

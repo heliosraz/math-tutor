@@ -8,7 +8,7 @@ from agent import Agent
 import time
 
 config = {"configurable": {"thread_id": "abc123"}}
-agent = Agent("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")
+agent = Agent()
 
 def invoke(prompt):
     for step in agent.stream(
@@ -18,7 +18,7 @@ def invoke(prompt):
     ):
         step["messages"][-1].pretty_print()
 
-prompt0 = "what is 3 multiplied by 7"
+prompt0 = "what is 3 multiplied by 7? Please use the planning tool"
 invoke(prompt0)
 print("sleeping for a little, I can only process so many messages at once!")
 time.sleep(10)
