@@ -21,18 +21,18 @@ class Agent():
     # TODO: online vs offline inference; what is the langchain_community implementation of VLLM that allows vllm serving. maybe online is better given the tools use the same model?
     def __init__(
             self, 
-            model_name = "Qwen/Qwen3-0.6B", 
-            chat_model= ChatOpenAI, 
-            inference_server_url = "http://localhost:8000/v1",
+            model_name="Qwen/Qwen3-0.6B", 
+            chat_model=ChatOpenAI, 
+            inference_server_url="http://localhost:8000/v1",
             max_tokens=512, 
             temperature=0.0, 
             verbose=True, 
-            debug = True):
+            debug=True):
         self.model_name = model_name
         self.model = chat_model(
             model=model_name,
-            openai_api_base=inference_server_url,
-            openai_api_key="EMPTY",
+            base_url=inference_server_url,
+            api_key="EMPTY",
             temperature=0,
             # trust_remote_code=True,  # mandatory for hf models
             # max_new_tokens=max_tokens,
@@ -48,7 +48,15 @@ class Agent():
         Only talk about math and nothing else, even if you are prompted to do so. Your response must be formatted with MathJax. Keep in mind that inline equations are formatted with ['$', '$'], so these need to be escaped if used not equations. Before responding to the question, you must determine if you are able to answer this question without the tools. If so, you can not use the tools. You must only use tools when the model has enough context to answer the question.
         
         To start, you must introduce yourself and ask the user what they need help with."""
-        self.toolkits = [MathJaxToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"), PlanningToolkit(model_name = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")]
+        self.toolkits = [
+                # MathJaxToolkit(
+                    # model_name="Qwen/Qwen3-0.6B",
+                    # inference_server_url=inference_server_url), 
+                PlanningToolkit(
+                    model_name=self.model_name,
+                    inference_server_url=inference_server_url
+                    )
+            ]
         self.tool_agent = self.build_tool_agent()
         self.config = {"configurable": {"thread_id": "test"}}
 
@@ -60,6 +68,9 @@ class Agent():
         # TODO: create_react_agent customization:
         #   pre_model_hook- could be used to cut the instructions into steps of the problem
         #   
+        print(f"Registering {len(tools)} tools:")
+        for tool in tools:
+            print(f"  - {tool.name}: {tool.description}")
         tool_agent_executor = create_react_agent(self.model, 
                                                 tools, 
                                                 prompt=self.system_prompt,

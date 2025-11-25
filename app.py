@@ -5,10 +5,11 @@ from utils import load_credentials
 import time
 import os
 
+os.environ["OPENAI_API_KEY"]="EMPTY"
 app = Flask(__name__)
-agent = Agent("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free")
+agent = Agent()
 config = {"configurable": {"thread_id": "abc123"}}
-messages = [SystemMessage(content=agent.system_prompts["default"])]
+messages = [SystemMessage(content=agent.system_prompt)]
 # create text file to store conversation
 os.makedirs("./conversations/", exist_ok = True)
 convo_txt = "./conversations/" + time.ctime().replace(' ', '_').replace(':', '_')
